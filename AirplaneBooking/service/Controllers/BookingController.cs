@@ -10,29 +10,30 @@ namespace service.Controllers
     {
         private readonly IMessangeProducer _messageProducer;
         private readonly ILogger<BookingController> _logger;
-        
-        private static readonly List<Booking> _bookings = new();
+        private readonly IStorage _storage;
+
         public BookingController(IMessangeProducer messangeProducer,
-            ILogger<BookingController> logger)
+            ILogger<BookingController> logger,
+            IStorage storage
+        )
         {
+            _storage = storage;
             _messageProducer = messangeProducer;
-            _logger = logger; 
+            _logger = logger;
         }
 
         [HttpPost]
-        public IActionResult CreateBooking(Booking newBooking) 
+        public IActionResult CreateBooking(Booking newBooking)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest();
             }
 
-            _bookings.Add(newBooking);
+            _storage.AddBooking(newBooking);
             _messageProducer.SendMessage<Booking>(newBooking);
 
             return Ok();
-
-        } 
-
+        }
     }
 }
